@@ -1,0 +1,8 @@
+# Playwright MCP server artifacts
+.playwright-mcp/
+
+# macOS
+.DS_Store
+
+# Stray test screenshots in repo root
+/*.png

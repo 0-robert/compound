@@ -1,0 +1,35 @@
+/* Whoosh viewport — fixed-size window onto a much larger world.
+   overflow:hidden is what makes the screen feel like a moving camera:
+   anything outside the current camera view gets clipped. */
+
+.whoosh-viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #E8E8E6;
+}
+
+/* The world is a fixed-size plane (6000x3000). Camera transform is applied
+   via inline style. Transform-origin at top-left so camera math is simple:
+   "put world point (cx, cy) at screen center". */
+.whoosh-world {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+}
+
+.whoosh-site-image {
+  position: absolute;
+  object-fit: cover;
+  display: block;
+}
+
+.whoosh-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  pointer-events: none;
+}
