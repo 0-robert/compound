@@ -43,7 +43,10 @@ def _normalize_url(url: str) -> str:
         return s
     if s.startswith("//"):
         return "https:" + s
-    if not s.startswith(("http://", "https://")):
+    # Case-insensitive scheme check so an upstream-normalised URL like
+    # `HTTP://example.com` (preserved verbatim by main._normalize_url)
+    # doesn't get a second `https://` prepended.
+    if not s.lower().startswith(("http://", "https://")):
         return "https://" + s
     return s
 
