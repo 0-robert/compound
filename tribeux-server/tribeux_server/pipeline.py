@@ -171,7 +171,7 @@ def _png_to_data_url(png: bytes | None) -> str | None:
 
 STAGE_LABELS = {
     "render":    "PLAYWRIGHT.CHROMIUM · TRIBEDOMTREE EXTRACT",
-    "encode":    "SCROLL CAPTURE · 13 × 256²",
+    "encode":    "SCROLL CAPTURE · 10 × 256²",
     "tribe":     "TRIBE v2 (stub) · CORTICAL FORWARD",
     "project":   "DESTRIEUX · 4 AFFECTIVE AXES",
     "benchmark": "COHORT · n=30 LANDING PAGES",
