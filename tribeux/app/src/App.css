@@ -3407,10 +3407,9 @@
 }
 .pitch__arch-code-tabs {
   display: flex;
-  font-size: 11px;
   background: oklch(0.18 0.01 260);
   border-bottom: 1px solid oklch(0.25 0.01 260);
-  font-size: 9.5px;
+  font-size: 11px;
   letter-spacing: 0.06em;
 }
 .pitch__arch-code-tabs span {
@@ -3425,11 +3424,9 @@
 .pitch__arch-code-body {
   margin: 0;
   padding: 10px 12px;
+  color: oklch(0.92 0.01 260);
   font-size: 12px;
   line-height: 1.55;
-  color: oklch(0.92 0.01 260);
-  font-size: 10.5px;
-  line-height: 1.45;
   white-space: pre;
   min-height: 64px;
 }
