@@ -25,7 +25,14 @@ class JobStore:
         self._lock = threading.Lock()
         self._jobs: dict[str, Job] = {}
         self._starts: dict[str, datetime] = {}
-        self._subscribers: dict[str, list[asyncio.Queue[tuple[str, Any]]]] = {}
+        # Each subscriber tracks the asyncio loop that owns its queue so
+        # broadcasts arriving from worker threads (e.g. claude_analyst
+        # invoked via asyncio.to_thread) can hop back onto the loop via
+        # `call_soon_threadsafe` — `asyncio.Queue` itself is not thread
+        # safe.
+        self._subscribers: dict[
+            str, list[tuple[asyncio.Queue[tuple[str, Any]], asyncio.AbstractEventLoop]]
+        ] = {}
 
     @staticmethod
     def _now() -> str:
@@ -78,8 +85,9 @@ class JobStore:
         on connect.
         """
         q: asyncio.Queue[tuple[str, Any]] = asyncio.Queue()
+        loop = asyncio.get_running_loop()
         with self._lock:
-            self._subscribers.setdefault(job_id, []).append(q)
+            self._subscribers.setdefault(job_id, []).append((q, loop))
             job = self._jobs.get(job_id)
             checkpoints = list(job.checkpoints) if job else []
             logs = list(job.logs) if job else []
@@ -108,16 +116,22 @@ class JobStore:
     def unsubscribe(self, job_id: str, q: asyncio.Queue[tuple[str, Any]]) -> None:
         with self._lock:
             subs = self._subscribers.get(job_id)
-            if subs and q in subs:
-                subs.remove(q)
+            if not subs:
+                return
+            subs[:] = [(qq, loop) for (qq, loop) in subs if qq is not q]
 
     def _broadcast(self, job_id: str, event_type: str, payload: Any) -> None:
         with self._lock:
             subs = list(self._subscribers.get(job_id, []))
-        for q in subs:
+        for q, loop in subs:
+            # Hop onto the queue's owning loop so this is safe whether
+            # the caller is the loop thread (sync `await` callers) or a
+            # worker thread (claude_analyst.analyze run via
+            # asyncio.to_thread). Either way, `q.put_nowait` runs on
+            # the loop and `asyncio.Queue` invariants hold.
             try:
-                q.put_nowait((event_type, payload))
-            except asyncio.QueueFull:  # pragma: no cover — unbounded queue
+                loop.call_soon_threadsafe(q.put_nowait, (event_type, payload))
+            except RuntimeError:  # pragma: no cover — loop closed during shutdown
                 pass
 
     # ------------------------------------------------------------------
