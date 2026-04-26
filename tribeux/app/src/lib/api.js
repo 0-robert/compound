@@ -18,15 +18,13 @@ import {
 
 const BASE = '/api'
 
-export async function startAnalysis(url, { useRealRender } = {}) {
+export async function startAnalysis(
+  url,
+  { useRealRender = true, parentJobId = null, iterations = 1 } = {},
+) {
   if (isMockEnabled()) return startMockAnalysis(url)
-  // Only send `use_real_render` when the caller explicitly opts in or
-  // out. Omitting the field lets the server's `AnalyzeRequest` default
-  // (`True`) win — the live render is what we actually want for every
-  // user-driven scan, and the previous `false` default here was
-  // silently masking the live pipeline.
-  const body = { url }
-  if (typeof useRealRender === 'boolean') body.use_real_render = useRealRender
+  const body = { url, use_real_render: useRealRender, iterations }
+  if (parentJobId) body.parent_job_id = parentJobId
   const res = await fetch(`${BASE}/analyze`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -45,6 +43,13 @@ export async function getJob(jobId) {
   if (isMockEnabled()) return getMockJob(jobId)
   const res = await fetch(`${BASE}/jobs/${jobId}`)
   if (!res.ok) throw new Error(`GET /api/jobs/${jobId} failed: ${res.status}`)
+  return res.json()
+}
+
+export async function getChain(jobId) {
+  if (isMockEnabled()) return { chain: [] }
+  const res = await fetch(`${BASE}/jobs/${jobId}/chain`)
+  if (!res.ok) throw new Error(`GET /api/jobs/${jobId}/chain failed: ${res.status}`)
   return res.json()
 }
 

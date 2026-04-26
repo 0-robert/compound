@@ -84,9 +84,17 @@ async def _full_screenshot(url: str, *, patch_script: str | None = None) -> byte
                 page = await ctx.new_page()
                 await page.goto(url, wait_until="networkidle", timeout=60_000)
                 if patch_script:
+                    # Wrap the caller-supplied JS in a try/catch IIFE so a
+                    # bad selector (or a script that throws after a
+                    # successful patch) can't kill the screenshot.
+                    safe = (
+                        "() => { try {\n"
+                        + patch_script
+                        + "\n} catch (e) { console.warn('tribeux patch failed', e); } }"
+                    )
                     try:
-                        await page.evaluate(patch_script)
-                    except Exception:
+                        await page.evaluate(safe)
+                    except Exception:  # noqa: BLE001
                         pass
                 return await page.screenshot(full_page=True)
             finally:
@@ -101,7 +109,12 @@ async def render_url(
     duration: int = _DURATION_S,
     patch_script: str | None = None,
 ) -> dict:
-    """URL → {video_path, page_text, frames, full_page_png}.
+    """URL → {video_path, page_text, frames, full_page_png, scroll_log, ...}.
+
+    `patch_script` is optional JS replayed after navigation and before
+    scroll — used both by the patched-site re-render path here and by
+    the iterative orchestrator on `main` to stack outerHTML edits
+    across passes.
 
     Raises ImportError if the local `urltovideo` package isn't on disk
     so the orchestrator can degrade to sample mode visibly. The caller
@@ -134,6 +147,10 @@ async def render_url(
         "page_text": rec.get("text", "") or "",
         "frames": frames,
         "full_page_png": full_page_png,
+        "scroll_log": rec.get("scroll_log") or [],
+        "total_height": rec.get("total_height", 0),
+        "viewport_h": rec.get("viewport_h", 1024),
+        "actual_duration_s": rec.get("actual_duration_s", float(duration)),
     }
 
 
