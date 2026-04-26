@@ -210,6 +210,12 @@ async def run_pipeline(
             log("render", f"playwright.chromium.headless · target {url}")
             units, full_screenshot_v1 = await _run_domtree(url) if use_real_render else (_fallback_units(), None)
             log("render", f"tribedomtree extracted {len(units)} DOM unit(s)")
+            # Emit the landing-page screenshot the moment we have it so
+            # the Demo stimulus canvas has something real to show during
+            # the long encode wait. Superseded by `set_video()` once the
+            # scrolling capture finishes.
+            if full_screenshot_v1:
+                jobs.store.set_screenshot(job_id, full_screenshot_v1)
             await beat()
 
         video_path: str | None = None

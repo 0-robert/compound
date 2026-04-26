@@ -30,6 +30,11 @@ class JobStore:
         # of the Job schema so the on-disk path never leaks to clients —
         # the client only sees the streaming URL set on `Job.video_url`.
         self._video_paths: dict[str, str] = {}
+        # Server-local PNG bytes for the above-fold landing-page
+        # screenshot, captured at the end of the render stage. Same
+        # privacy posture as `_video_paths`: the client only sees the
+        # public URL on `Job.screenshot_url`.
+        self._screenshot_bytes: dict[str, bytes] = {}
 
     @staticmethod
     def _now() -> str:
@@ -100,6 +105,7 @@ class JobStore:
             result = job.result if job else None
             error = job.error if job else None
             video_url = job.video_url if job else None
+            screenshot_url = job.screenshot_url if job else None
 
         # Replay buffered state in chronological-ish order.
         for cp in checkpoints:
@@ -110,6 +116,12 @@ class JobStore:
             q.put_nowait(("progress", progress.model_dump()))
         if status is not None:
             q.put_nowait(("status", {"status": status}))
+        # Replay screenshot URL first — if both screenshot and video
+        # exist (rejoin after pipeline finished), the client folds them
+        # in the right order: screenshot becomes the base, video
+        # supersedes once it lands.
+        if screenshot_url:
+            q.put_nowait(("screenshot", {"screenshot_url": screenshot_url}))
         # Replay video URL ahead of result so reconnects (e.g. Report
         # deep-links) can render the scrolling capture immediately.
         if video_url:
@@ -186,6 +198,30 @@ class JobStore:
             job.checkpoints.append(cp)
             job.updated_at = self._now()
         self._broadcast(job_id, "checkpoint", cp.model_dump())
+
+    def set_screenshot(self, job_id: str, png_bytes: bytes) -> None:
+        """Register the above-fold landing-page screenshot and broadcast.
+
+        The PNG bytes stay server-side; subscribers receive a
+        `screenshot` SSE event carrying the public URL so they can wire
+        up the stimulus canvas with a real image during the long
+        encode/inference wait. Later, `set_video` supersedes this with
+        the scrolling capture mp4.
+        """
+        if not png_bytes:
+            return
+        screenshot_url = f"/api/jobs/{job_id}/screenshot"
+        with self._lock:
+            self._screenshot_bytes[job_id] = png_bytes
+            job = self._jobs.get(job_id)
+            if job is not None:
+                job.screenshot_url = screenshot_url
+                job.updated_at = self._now()
+        self._broadcast(job_id, "screenshot", {"screenshot_url": screenshot_url})
+
+    def get_screenshot_bytes(self, job_id: str) -> Optional[bytes]:
+        with self._lock:
+            return self._screenshot_bytes.get(job_id)
 
     def set_video(self, job_id: str, video_path: str) -> None:
         """Register the scrolling-capture mp4 for `job_id` and broadcast.

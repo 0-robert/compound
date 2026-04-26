@@ -75,6 +75,9 @@ function makeFakeStream(jobId, url) {
     const ss = String(Math.floor((ms / 1000) % 60)).padStart(2, '0')
     return `${mm}:${ss}`
   }
+  // Pick a static landing screenshot for the URL so mock mode mirrors
+  // the real backend's screenshot event. Falls back to stripe.
+  const ssUrl = mockScreenshotUrlFor(url)
   MOCK_STAGES.forEach((stage, idx) => {
     const tStart = acc
     timers.push(setTimeout(() => {
@@ -86,7 +89,13 @@ function makeFakeStream(jobId, url) {
       // merge ordering interleaves logs with checkpoints correctly.
       fire('log', { t: fmtT(tStart), stage: stage.key, message: stage.log })
       fire('progress', { stage: stage.key, pct: ((idx + 1) / MOCK_STAGES.length) * 100 })
-      if (idx === 0) fire('status', { status: 'running' })
+      if (idx === 0) {
+        fire('status', { status: 'running' })
+        // Mirror the real backend: emit the landing screenshot at the
+        // *end* of render so the stimulus canvas has a real image to
+        // show during the encode wait.
+        if (ssUrl) fire('screenshot', { screenshot_url: ssUrl })
+      }
     }, tStart))
     timers.push(setTimeout(() => {
       fire('checkpoint', {
@@ -107,6 +116,23 @@ function makeFakeStream(jobId, url) {
   }, acc))
 
   return fakeSource
+}
+
+// Map URL hostname → a static landing-page screenshot bundled in
+// /public. Mirrors the real backend's screenshot SSE event in mock
+// mode. Add new entries here when bundling more landing PNGs.
+function mockScreenshotUrlFor(url) {
+  if (!url) return '/stripe-landing.png'
+  const u = String(url).toLowerCase()
+  if (/(^|[/.])airbnb\.com(\/|$)/.test(u) || /^airbnb(\.com)?$/.test(u.trim())) {
+    return '/airbnb-landing.png'
+  }
+  if (/(^|[/.])stripe\.com(\/|$)/.test(u) || /^stripe(\.com)?$/.test(u.trim())) {
+    return '/stripe-landing.png'
+  }
+  // Default fallback so the stimulus canvas still has a real image
+  // even for URLs without a bundled asset.
+  return '/stripe-landing.png'
 }
 
 // Per-job state. `started` flips true when the first subscribe walks the
@@ -134,6 +160,11 @@ function fmtT(ms) {
 function buildTerminalEvents(url) {
   const result = { ...MOCK_REPORT, url: url || MOCK_REPORT.url }
   const out = []
+  // Replay the screenshot event up front so re-subscribes (e.g. Report
+  // deep-link) see the landing image immediately, mirroring the real
+  // backend's `subscribe()` replay logic.
+  const ssUrl = mockScreenshotUrlFor(url)
+  if (ssUrl) out.push(['screenshot', { screenshot_url: ssUrl }])
   MOCK_STAGES.forEach((stage, idx) => {
     const tStart = idx * STAGE_DURATION_MS
     const label = stage.log.split('·')[0].trim()

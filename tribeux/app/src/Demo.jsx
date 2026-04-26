@@ -69,6 +69,10 @@ export default function Demo() {
   // encode stage completes, so the user watches the actual scraped page
   // playing back while later stages (tribe / claude / compose) finish.
   const videoUrl = job?.video_url || null
+  // Above-fold landing-page screenshot — emitted at the *end* of render
+  // (well before video is ready). Bridges the ~10s encode wait so the
+  // stimulus canvas isn't an empty stub during early stages.
+  const screenshotUrl = job?.screenshot_url || null
 
   const [bars, setBars] = useState(() => Array(24).fill(0.3))
   const tRef = useRef(0)
@@ -196,6 +200,17 @@ export default function Demo() {
                 animate={{ opacity: 1, filter: 'blur(0px)' }}
                 transition={{ duration: 0.42, ease: EASE_OUT_QUINT }}
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : screenshotUrl ? (
+              <motion.img
+                key={`scan-screenshot-${screenshotUrl}`}
+                src={screenshotUrl}
+                alt="landing page screenshot"
+                className="scan__video-media"
+                initial={{ opacity: 0, filter: 'blur(8px)' }}
+                animate={{ opacity: 1, filter: 'blur(0px)' }}
+                transition={{ duration: 0.34, ease: EASE_OUT_QUINT }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }}
               />
             ) : (
               <>

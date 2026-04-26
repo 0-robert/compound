@@ -293,6 +293,12 @@ class Job(BaseModel):
     # the encode stage finishes so the Demo page can render the actual
     # scraped video while later stages (tribe / claude / compose) run.
     video_url: Optional[str] = None
+    # URL for the above-fold landing-page screenshot — populated at the
+    # *end* of the render stage (well before the scrolling video is
+    # ready) so the Demo stimulus canvas has a real image to show
+    # instead of an empty stub during the ~10s encode wait. Superseded
+    # by `video_url` once the scrolling capture finishes.
+    screenshot_url: Optional[str] = None
 
 
 class AnalyzeRequest(BaseModel):

@@ -17,7 +17,7 @@ for candidate in (_HERE / ".env", _HERE.parent / ".env"):
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, Response, StreamingResponse
 
 from . import jobs, pipeline
 from .schemas import AnalyzeRequest, AnalyzeResponse, Job
@@ -209,6 +209,27 @@ def get_job_video(job_id: str) -> FileResponse:
     )
 
 
+@app.get("/api/jobs/{job_id}/screenshot")
+def get_job_screenshot(job_id: str) -> Response:
+    """Serve the above-fold landing-page PNG captured at end of render.
+
+    Lives in memory on the JobStore (small enough; ~100KB-1MB per job).
+    Used by Demo as a base image while the scrolling-capture mp4 is
+    still being recorded.
+    """
+    job = jobs.store.get(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="job not found")
+    png = jobs.store.get_screenshot_bytes(job_id)
+    if not png:
+        raise HTTPException(status_code=404, detail="screenshot not ready")
+    return Response(
+        content=png,
+        media_type="image/png",
+        headers={"Cache-Control": "no-cache"},
+    )
+
+
 @app.get("/api/jobs/{job_id}/events")
 async def job_events(job_id: str, request: Request) -> StreamingResponse:
     """Server-Sent Events stream for a job.
@@ -218,6 +239,7 @@ async def job_events(job_id: str, request: Request) -> StreamingResponse:
       event: progress    data: {stage, pct}
       event: checkpoint  data: {stage, kind, label, t, elapsed_ms}
       event: status      data: {status}
+      event: screenshot  data: {screenshot_url}
       event: video       data: {video_url}
       event: result      data: <Report>
       event: error       data: {message}
