@@ -1,0 +1,22 @@
+{
+  "url": "https://stripe.com",
+  "captured_at_unix": 1777191717.577974,
+  "n_screenshots": 3,
+  "viewport": {
+    "w": 1440,
+    "h": 900
+  },
+  "device_scale_factor": 2,
+  "page_height_px": 14548,
+  "max_scroll_px": 13648,
+  "scroll_positions_px": [
+    0,
+    6824,
+    13648
+  ],
+  "screenshots": [
+    "screenshots/01.png",
+    "screenshots/02.png",
+    "screenshots/03.png"
+  ]
+}

@@ -1,0 +1,17 @@
+# Per-site captured data is large + PII-like (EEG); not for git
+data/*/eeg.csv
+data/*/events.csv
+data/*/muse_features.npz
+data/*/tribe_features.npz
+data/*/report.json
+data/*/rdm_*.png
+data/aggregate/
+
+# Keep manifests + screenshots as reproducibility anchors
+!data/*/manifest.json
+!data/*/screenshots/
+
+# Python cruft
+__pycache__/
+*.pyc
+.venv/

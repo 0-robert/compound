@@ -1,0 +1,22 @@
+# RSA pipeline — TRIBE v2 predictions vs Muse 2 EEG
+#
+# All stages. Install once with:
+#   pip install -r requirements.txt
+
+# Stimulus capture (module 1)
+playwright>=1.47
+
+# Experiment runner (module 2)
+pygame>=2.5
+pylsl>=1.16
+
+# EEG feature extraction (module 4)
+mne>=1.7
+numpy>=1.26
+scipy>=1.13
+
+# TRIBE runner (module 3)
+requests>=2.31
+
+# RSA analysis (module 5) + plots
+matplotlib>=3.8

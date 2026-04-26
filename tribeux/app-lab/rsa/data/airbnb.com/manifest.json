@@ -1,0 +1,28 @@
+{
+  "url": "https://airbnb.com",
+  "captured_at_unix": 1777182740.9976242,
+  "n_screenshots": 6,
+  "viewport": {
+    "w": 1440,
+    "h": 900
+  },
+  "device_scale_factor": 2,
+  "page_height_px": 1261,
+  "max_scroll_px": 361,
+  "scroll_positions_px": [
+    0,
+    72,
+    144,
+    217,
+    289,
+    361
+  ],
+  "screenshots": [
+    "screenshots/01.png",
+    "screenshots/02.png",
+    "screenshots/03.png",
+    "screenshots/04.png",
+    "screenshots/05.png",
+    "screenshots/06.png"
+  ]
+}

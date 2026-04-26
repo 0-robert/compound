@@ -1,0 +1,28 @@
+{
+  "url": "https://linear.app",
+  "captured_at_unix": 1777182719.7523782,
+  "n_screenshots": 6,
+  "viewport": {
+    "w": 1440,
+    "h": 900
+  },
+  "device_scale_factor": 2,
+  "page_height_px": 10781,
+  "max_scroll_px": 9881,
+  "scroll_positions_px": [
+    0,
+    1976,
+    3952,
+    5929,
+    7905,
+    9881
+  ],
+  "screenshots": [
+    "screenshots/01.png",
+    "screenshots/02.png",
+    "screenshots/03.png",
+    "screenshots/04.png",
+    "screenshots/05.png",
+    "screenshots/06.png"
+  ]
+}
