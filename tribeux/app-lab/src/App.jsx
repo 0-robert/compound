@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import UrlPill from './UrlPill'
 import Demo from './Demo'
+import Muse from './Muse'
 import './App.css'
 
 function Landing() {
@@ -19,6 +20,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/demo" element={<Demo />} />
+        <Route path="/muse" element={<Muse />} />
       </Routes>
     </BrowserRouter>
   )
