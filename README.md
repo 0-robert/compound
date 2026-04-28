@@ -14,7 +14,7 @@ Paste any URL. We render it, predict the brain's response, find the weakest sect
 [Quickstart](#-quickstart) ·
 [API](#-api) ·
 [Repo layout](#-repo-layout) ·
-[Master plan](./tribeux-master-plan.md)
+[Master plan](./docs/master-plan.md)
 
 </div>
 
@@ -122,13 +122,11 @@ demo runs offline and in CI.
 | Path | What it is |
 |------|------------|
 | **[`tribeux/app`](./tribeux/app)** | The main user-facing site — Vite + React 19 + Framer Motion + Three.js. Routes: `/` Landing, `/demo` live pipeline runner with SSE-driven brain canvas, `/report` before/after with draggable slider and per-axis time-series, `/pitch` deck. |
-| [`tribeux/app-lab`](./tribeux/app-lab) | Sandbox / lab variant of the frontend used for prototyping motion + canvas ideas. |
-| [`tribeux/frontend`](./tribeux/frontend) | Static design canvas + tweaks-panel scratch used to explore the report layout before it landed in `app`. |
+| [`tribeux/app-lab`](./tribeux/app-lab) | Sandbox / lab variant of the frontend used for prototyping motion + canvas ideas (includes the Muse EEG bridge). |
 | **[`tribeux-server`](./tribeux-server)** | FastAPI orchestrator. Single async pipeline (`pipeline.run_pipeline`), in-memory job store with pub/sub, SSE event stream, cohort + sample fixtures. |
 | **[`tribeux-domtree`](./tribeux-domtree)** | DOM analysis package. Renders pages with Playwright, extracts and scores semantic units, clusters them into sections (`hero`, `nav`, `cta`, `features`, `footer`…), and applies HTML patches surgically by selector. |
 | **[`urltovideo`](./urltovideo)** | Tiny Playwright + moviepy package: navigate to a URL, smooth-scroll to the bottom, return text + a 256×256 @ 30fps mp4. Used both by the server and as a standalone toolkit. |
-| [`neuro_ux_pipeline.py`](./neuro_ux_pipeline.py) | Standalone Python prototype that wires `urltovideo` + `tribeux-domtree` into the same iteration loop without the FastAPI layer. |
-| [`tribeux-master-plan.md`](./tribeux-master-plan.md) | Long-form design doc — the full product spec, license stance on TRIBE v2, and roadmap. |
+| [`docs/master-plan.md`](./docs/master-plan.md) | Long-form design doc — the full product spec, license stance on TRIBE v2, and roadmap. |
 
 ---
 
@@ -251,7 +249,7 @@ The Claude analyst always optimises against the **worst** axis first.
 ## ✦ Status & roadmap
 
 This is a hackathon prototype built for **To The Americas (April 25–26, 2026)**.
-The product roadmap is documented in [`tribeux-master-plan.md`](./tribeux-master-plan.md):
+The product roadmap is documented in [`docs/master-plan.md`](./docs/master-plan.md):
 
 1. Demo with TRIBE v2 (current) — research-only, predicted brain-space representations.
 2. Founding-user deposits at £9.

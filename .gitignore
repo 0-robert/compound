@@ -24,12 +24,6 @@
 /2027-*-*.txt
 /continue_pipelinework.txt
 
-# Editor / paste artefacts under tribeux/frontend (design scratch only)
-tribeux/frontend/uploads/
-tribeux/frontend/screenshots/
-tribeux/frontend/IMG_*.jpeg
-tribeux/frontend/IMG_*.jpg
-tribeux/frontend/IMG_*.png
 
 # tribeux-domtree
 /tribeux-domtree/venv/

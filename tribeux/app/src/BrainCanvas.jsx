@@ -3,7 +3,8 @@ import * as THREE from 'three'
 
 // =========================================================================
 // TRIBE v2-style cortical activation render.
-// Ported from tribeux/frontend/src/BrainCanvas.jsx.
+// fsaverage5 cortex with TRIBE v2 activation rendering, driven by per-second
+// scores from the Demo page.
 // =========================================================================
 
 const FSAVG_URL = '/assets/fsaverage5.glb'
